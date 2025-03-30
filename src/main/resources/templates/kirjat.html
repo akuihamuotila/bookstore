@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+  lang="fi"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kirjalista</title>
+    <link
+      type="text/css"
+      rel="stylesheet"
+      href="/css/bootstrap.min.css"
+      th:href="@{/css/bootstrap.min.css}"
+    />
+  </head>
+  <body class="container">
+    <!-- Otsikkopalkki -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+      <div class="container-fluid">
+        <span class="navbar-brand">Kirjakauppa</span>
+        <div class="d-flex">
+          <span sec:authorize="isAuthenticated()" class="me-3">
+            Kirjautunut käyttäjä: <span sec:authentication="name"></span>
+          </span>
+          <a
+            sec:authorize="!isAuthenticated()"
+            th:href="@{/login}"
+            class="btn btn-primary me-2"
+            >Kirjaudu</a
+          >
+          <form
+            sec:authorize="isAuthenticated()"
+            th:action="@{/logout}"
+            method="post"
+          >
+            <button type="submit" class="btn btn-danger">Kirjaudu ulos</button>
+          </form>
+        </div>
+      </div>
+    </nav>
+
+    <h1 class="mt-4">Kirjalista</h1>
+
+    <form th:action="@{/books}" method="post" class="mb-4">
+      <div class="mb-2">
+        <label for="nimi" class="form-label">Kirjan nimi:</label>
+        <input
+          type="text"
+          id="nimi"
+          name="nimi"
+          class="form-control"
+          required
+        />
+      </div>
+      <div class="mb-2">
+        <label for="kirjailija" class="form-label">Kirjailija:</label>
+        <input
+          type="text"
+          id="kirjailija"
+          name="kirjailija"
+          class="form-control"
+          required
+        />
+      </div>
+      <div class="mb-2">
+        <label for="publicationYear" class="form-label">Julkaisuvuosi:</label>
+        <input
+          type="number"
+          id="publicationYear"
+          name="publicationYear"
+          class="form-control"
+          required
+        />
+      </div>
+      <div class="mb-2">
+        <label for="category" class="form-label">Kategoria:</label>
+        <select id="category" name="categoryId" class="form-control" required>
+          <option
+            th:each="category : ${categories}"
+            th:value="${category.id}"
+            th:text="${category.name}"
+          ></option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-success">Lisää</button>
+    </form>
+
+    <h2>Kirjat</h2>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Nimi</th>
+          <th>Kirjailija</th>
+          <th>Julkaisuvuosi</th>
+          <th>Kategoria</th>
+          <th>Toiminnot</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="kirja : ${kirjat}">
+          <td th:text="${kirja.nimi}"></td>
+          <td th:text="${kirja.kirjailija}"></td>
+          <td th:text="${kirja.publicationYear}"></td>
+          <td
+            th:text="${kirja.category != null ? kirja.category.name : 'Ei kategoriaa'}"
+          ></td>
+          <td>
+            <a
+              sec:authorize="hasRole('ADMIN')"
+              th:href="@{/books/edit/{id}(id=${kirja.id})}"
+              class="btn btn-warning btn-sm"
+              >Muokkaa</a
+            >
+
+            <a
+              sec:authorize="hasRole('ADMIN')"
+              th:href="@{/books/delete/{id}(id=${kirja.id})}"
+              class="btn btn-danger btn-sm"
+              onclick="return confirm('Haluatko varmasti poistaa tämän kirjan?');"
+              >Poista</a
+            >
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>
